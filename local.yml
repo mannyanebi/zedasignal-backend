@@ -1,0 +1,123 @@
+version: "3"
+
+volumes:
+  zedasignal_backend_local_postgres_data: {}
+  zedasignal_backend_local_postgres_data_backups: {}
+  zedasignal_backend_local_traefik: {}
+  zedasignal_backend_local_mailhog_data: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: zedasignal_backend_local_django
+    container_name: zedasignal_backend_local_django
+    depends_on:
+      - postgres
+      # - redis
+      - mailhog
+    volumes:
+      - .:/app:z
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    ports:
+      - "8000:8000"
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/production/postgres/Dockerfile
+    image: zedasignal_backend_production_postgres
+    container_name: zedasignal_backend_local_postgres
+    volumes:
+      - zedasignal_backend_local_postgres_data:/var/lib/postgresql/data
+      - zedasignal_backend_local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.postgres
+
+  # docs:
+  #   image: zedasignal_backend_local_docs
+  #   container_name: zedasignal_backend_local_docs
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/local/docs/Dockerfile
+  #   env_file:
+  #     - ./.envs/.local/.django
+  #   volumes:
+  #     - ./docs:/docs:z
+  #     - ./config:/app/config:z
+  #     - ./zedasignal_backend:/app/zedasignal_backend:z
+  #   ports:
+  #     - '9000:9000'
+  #   command: /start-docs
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.0
+    container_name: zedasignal_backend_local_mailhog
+    volumes:
+    - zedasignal_backend_local_mailhog_data:/data
+    ports:
+      - "8025:8025"
+
+  smsapi2email:
+    image: krzysbaranski/smsapi2email
+    container_name: zedasignal_backend_local_smsapi2email
+    environment:
+      - DOMAIN=zedasignal.com
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+    # ports:
+    #   - "8088:8080"
+
+  # redis:
+  #   image: redis:6
+  #   container_name: zedasignal_backend_local_redis
+
+  # celeryworker:
+  #   <<: *django
+  #   image: zedasignal_backend_local_celeryworker
+  #   container_name: zedasignal_backend_local_celeryworker
+  #   depends_on:
+  #     - redis
+  #     - postgres
+  #     - mailhog
+  #   ports: []
+  #   command: /start-celeryworker
+
+  # celerybeat:
+  #   <<: *django
+  #   image: zedasignal_backend_local_celerybeat
+  #   container_name: zedasignal_backend_local_celerybeat
+  #   depends_on:
+  #     - redis
+  #     - postgres
+  #     - mailhog
+  #   ports: []
+  #   command: /start-celerybeat
+
+  # flower:
+  #   <<: *django
+  #   image: zedasignal_backend_local_flower
+  #   container_name: zedasignal_backend_local_flower
+  #   ports:
+  #     - '5555:5555'
+  #   command: /start-flower
+
+  # traefik:
+  #   build:
+  #     context: .
+  #     dockerfile: ./compose/local/traefik/Dockerfile
+  #   image: zedasignal_backend_local_traefik
+  #   container_name: zedasignal_backend_local_traefik
+  #   depends_on:
+  #     - django
+  #     - mailhog
+  #   volumes:
+  #     - zedasignal_backend_local_traefik:/etc/traefik/acme
+  #   ports:
+  #     - "0.0.0.0:80:80"
+  #     - "0.0.0.0:8080:8080"
+  #     # - "0.0.0.0:8088:8080"

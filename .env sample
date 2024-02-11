@@ -1,0 +1,35 @@
+# This is a sample env file. Do not commit this file to the repo.
+
+# General
+# ------------------------------------------------------------------------------
+USE_DOCKER=no
+IPYTHONDIR=/app/.ipython
+
+# Redis
+# ------------------------------------------------------------------------------
+REDIS_URL=redis://redis:6379/0
+
+# Celery
+# ------------------------------------------------------------------------------
+CELERY_BROKER_URL=redis://redis:6379/0
+
+# Flower
+CELERY_FLOWER_USER=dummy_user
+CELERY_FLOWER_PASSWORD=dummy_password
+
+
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=zedasignal_backend
+POSTGRES_USER=zedasignal_backend_db_user
+POSTGRES_PASSWORD=dummy_password
+
+# AWS SNS
+# ------------------------------------------------------------------------------
+AWS_ACCESS_KEY_ID=XXXXXXXXXX                # Access key of your AWS user.
+AWS_SECRET_ACCESS_KEY=XXXXXXXXXX            # Secret key of your AWS user.
+AWS_SNS_REGION_NAME=XXXXXXXXXX              # The region your SNS application is located in( e.g. 'eu-central-1').
+IOS_PLATFORM_APPLICATION_ARN=XXXXXXXXXX     # ARN for IOS platform application.
+ANDROID_PLATFORM_APPLICATION_ARN=XXXXXXXXXX # ARN for Android platform application.

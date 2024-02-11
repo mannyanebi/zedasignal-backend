@@ -1,0 +1,101 @@
+version: '3'
+
+volumes:
+  development_postgres_data: {}
+  development_postgres_data_backups: {}
+  development_traefik: {}
+  development_mailhog_maildir: {}
+  development_django_media: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/development/django/Dockerfile
+
+    image: zedasignal_backend_development_django
+    user: root
+    volumes:
+      - development_django_media:/app/zedasignal_backend/media
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./.envs/.development/.django
+      - ./.envs/.development/.postgres
+    command: /start
+    # ports:
+    #   - "5000:5000"
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/development/postgres/Dockerfile
+    image: zedasignal_backend_development_postgres
+    volumes:
+      - development_postgres_data:/var/lib/postgresql/data
+      - development_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.development/.postgres
+
+  traefik:
+    build:
+      context: .
+      dockerfile: ./compose/development/traefik/Dockerfile
+    image: zedasignal_backend_development_traefik
+    depends_on:
+      - django
+    volumes:
+      - development_traefik:/etc/traefik/acme
+    ports:
+      - '0.0.0.0:80:80'
+      - "0.0.0.0:8080:8080"
+      - '0.0.0.0:443:443'
+      # - '0.0.0.0:5555:5555'
+      # - '0.0.0.0:8025:8025'
+
+  redis:
+    image: redis:6
+
+  mailhog:
+    restart: always
+    # tty: true
+    # privileged: true
+    user: root
+    image: mailhog/mailhog:v1.0.0
+    # command: ["-storage=maildir", "-maildir-path=/maildir"]
+    container_name: zedasignal_backend_development_mailhog
+    volumes:
+      - development_mailhog_maildir:/home/mailhog/maildir
+      # - development_mailhog_smtpconf:/smtp_conf
+    ports:
+      - "8025:8025"
+    environment:
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=maildir
+      # - MH_OUTGOING_SMTP=/smtp_conf/smtp.json
+
+  # celeryworker:
+  #   <<: *django
+  #   image: zedasignal_backend_development_celeryworker
+  #   command: /start-celeryworker
+
+  # celerybeat:
+  #   <<: *django
+  #   image: zedasignal_backend_development_celerybeat
+  #   command: /start-celerybeat
+
+  # flower:
+  #   <<: *django
+  #   image: zedasignal_backend_development_flower
+  #   command: /start-flower
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./compose/development/nginx/Dockerfile
+    image: zedasignal_backend_local_nginx
+    depends_on:
+      - django
+    volumes:
+      - development_django_media:/usr/share/nginx/media:ro

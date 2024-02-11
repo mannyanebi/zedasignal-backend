@@ -1,0 +1,24 @@
+# General
+# ------------------------------------------------------------------------------
+USE_DOCKER=yes
+IPYTHONDIR=/app/.ipython
+# Redis
+# ------------------------------------------------------------------------------
+REDIS_URL=redis://redis:6379/0
+
+# Celery
+# ------------------------------------------------------------------------------
+
+# Flower
+CELERY_FLOWER_USER=KvpAAFgPdNCxrabAfnfITjvHhcZlwQHZ
+CELERY_FLOWER_PASSWORD=YuT2GASN4c7OiR9m1OtsQEMBluZEyEgBnAjzVLTjMjdiDuY2QGxZ0dWnNeWT5oDN
+
+
+# SMS
+# ------------------------------------------------------------------------------
+SMS2EMAILAPI_URL=http://zedasignal_backend_local_smsapi2email:8080/sms.do
+
+
+# DOMAIN NAME
+# ------------------------------------------------------------------------------
+DOMAIN_NAME=http://zedasignal-backend.localhost

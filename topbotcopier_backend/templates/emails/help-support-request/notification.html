@@ -1,0 +1,67 @@
+{% extends "emails/admin-base.html" %}
+
+{% block email_content %}
+<tr>
+  <td valign="top">
+    <!-- BEGIN MODULE: Content 13 -->
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+      <tr>
+        <td style="padding: 0px 0px 0px 0px;">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+            <tr>
+              <td valign="top" class="pc-w520-padding-30-30-30-30 pc-w620-padding-35-35-35-35"
+                style="padding: 40px 40px 40px 40px;border-radius: 0px;background-color: #ffffff;" bgcolor="#ffffff">
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td align="left" valign="top" style="padding: 0px 0px 13px 0px;">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" align="left">
+                        <tr>
+                          <td valign="top" class="pc-font-alt" align="left"
+                            style="mso-line-height: exactly;line-height: 121%;font-family: 'Fira Sans', Helvetica, Arial, sans-serif;font-size: 14px;font-weight: 500;color: #40be65;text-align: left;text-align-last: left;">
+                            <div><span style="color: #000000;">Hello, Support Admin.</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                  <tr>
+                    <td align="left" valign="top" style="padding: 0px 0px 10px 0px;">
+                      <table border="0" cellpadding="0" cellspacing="0" role="presentation" width="518" align="left">
+                        <tr>
+                          <td valign="top" align="left" style="padding: 0px 0px 0px 0px;">
+                            <div class="pc-font-alt; color: #000000;"
+                              style="line-height: 156%;font-family: 'Fira Sans', Helvetica, Arial, sans-serif;font-size: 15px;font-weight: normal;color: #9b9b9b;text-align: left;text-align-last: left;">
+                              <div>
+                                A user with the following information is requesting for help/support:
+                                <br>
+                                <br>
+                                Name: {% if name is not None%} {{ name }} {% else %} {{ user.name }} {% endif %}
+                                <br>
+                                Email: {% if email is not None%} {{ email }} {% else %} {{ user.username }} {% endif %}
+                                <br>
+                                <br>
+                                Message: {{ message }}
+
+                                <br><br>
+                                Thanks.
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <!-- END MODULE: Content 13 -->
+  </td>
+</tr>
+{% endblock email_content %}

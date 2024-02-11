@@ -1,0 +1,62 @@
+version: '3'
+
+volumes:
+  sandbox_postgres_data: {}
+  sandbox_postgres_data_backups: {}
+  sandbox_traefik: {}
+  sandbox_django_media: {}
+
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/sandbox/django/Dockerfile
+
+    image: zedasignal_backend_sandbox_django
+    user: root
+    volumes:
+      - sandbox_django_media:/app/zedasignal_backend/media
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - ./.envs/.sandbox/.django
+      - ./.envs/.sandbox/.postgres
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/sandbox/postgres/Dockerfile
+    image: zedasignal_backend_sandbox_postgres
+    volumes:
+      - sandbox_postgres_data:/var/lib/postgresql/data
+      - sandbox_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.sandbox/.postgres
+
+  traefik:
+    build:
+      context: .
+      dockerfile: ./compose/sandbox/traefik/Dockerfile
+    image: zedasignal_backend_sandbox_traefik
+    depends_on:
+      - django
+    volumes:
+      - sandbox_traefik:/etc/traefik/acme
+    ports:
+      - '0.0.0.0:80:80'
+      - '0.0.0.0:443:443'
+
+  redis:
+    image: redis:6
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./compose/sandbox/nginx/Dockerfile
+    image: zedasignal_backend_sandbox_nginx
+    depends_on:
+      - django
+    volumes:
+      - sandbox_django_media:/usr/share/nginx/media:ro

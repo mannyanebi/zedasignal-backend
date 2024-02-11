@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=zedasignal_backend
+POSTGRES_USER=aJnVzLpQrStUwXyZbCdEfGhIjKmNoPxYqRsT
+POSTGRES_PASSWORD=jKmNoPxYqRsTuvWxZyAbCdEfGhIiJlMnOpQrStUwVz12F3G4H5J6K7L8N9P0B7T6R5E4D3C2A1

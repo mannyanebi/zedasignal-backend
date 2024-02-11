@@ -1,0 +1,120 @@
+log:
+  level: INFO
+
+entryPoints:
+  web:
+    # http
+    address: ':80'
+    http:
+      # https://docs.traefik.io/routing/entrypoints/#entrypoint
+      redirections:
+        entryPoint:
+          to: web-secure
+
+  web-secure:
+    # https
+    address: ':443'
+
+certificatesResolvers:
+  letsencrypt:
+    # https://docs.traefik.io/master/https/acme/#lets-encrypt
+    acme:
+      email: 'developer@zedasignal.com'
+      storage: /etc/traefik/acme/acme.json
+      # https://docs.traefik.io/master/https/acme/#httpchallenge
+      httpChallenge:
+        entryPoint: web
+
+http:
+  routers:
+    web-secure-router:
+      rule: 'Host(`backend.zedasignal.com`)'
+      entryPoints:
+        - web-secure
+      middlewares:
+        - csrf
+      service: django
+      tls:
+        # https://docs.traefik.io/master/routing/routers/#certresolver
+        certResolver: letsencrypt
+
+    web-media-router:
+      rule: 'Host(`backend.zedasignal.com`) && PathPrefix(`/media/`)'
+      entryPoints:
+        - web-secure
+      middlewares:
+        - csrf
+      service: django-media
+      tls:
+        certResolver: letsencrypt
+
+    nextjs-secure-router:
+      rule: 'Host(`zedasignal.com`)'
+      entryPoints:
+        - web-secure
+      service: nextjs
+      tls:
+        # https://docs.traefik.io/master/routing/routers/#certresolver
+        certResolver: letsencrypt
+
+    # New routers from docker-compose.yml
+    wordpress-router:
+      rule: 'Host(`sales.zedasignal.com`)'
+      entryPoints:
+        - web-secure
+      service: mysitewordpress
+      middlewares:
+        - csrf
+        # - redirect-to-https
+      tls:
+        certResolver: letsencrypt
+
+    phpmyadmin-router:
+      rule: 'Host(`phpmyadmin.zedasignal.com`)'
+      entryPoints:
+        - web-secure
+      service: mysitephpmyadmin
+      # middlewares:
+      #   - redirect-to-https
+      tls:
+        certResolver: letsencrypt
+
+  middlewares:
+    csrf:
+      # https://docs.traefik.io/master/middlewares/headers/#hostsproxyheaders
+      # https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+      headers:
+        hostsProxyHeaders: ['X-CSRFToken']
+
+  services:
+    django:
+      loadBalancer:
+        servers:
+          - url: http://django:5000
+
+    django-media:
+      loadBalancer:
+        servers:
+          - url: http://nginx:80
+
+    nextjs:
+      loadBalancer:
+        servers:
+          - url: http://zedasignal-frontend-app:3000
+
+    # New services from docker-compose.yml
+    mysitewordpress:
+      loadBalancer:
+        servers:
+          - url: http://mysitewordpress:80
+
+    mysitephpmyadmin:
+      loadBalancer:
+        servers:
+          - url: http://mysitephpmyadmin:80
+
+providers:
+  # https://docs.traefik.io/master/providers/file/
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true

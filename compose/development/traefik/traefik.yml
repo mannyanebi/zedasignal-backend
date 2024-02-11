@@ -1,0 +1,96 @@
+log:
+  level: INFO
+
+api:
+  insecure: true
+
+  dashboard: true
+
+entryPoints:
+  web:
+    # http
+    address: ':80'
+    http:
+    #   # https://docs.traefik.io/routing/entrypoints/#entrypoint
+      redirections:
+        entryPoint:
+          to: web-secure
+
+  web-secure:
+    # https
+    address: ':443'
+
+certificatesResolvers:
+  letsencrypt:
+    # https://docs.traefik.io/master/https/acme/#lets-encrypt
+    acme:
+      email: 'anebiemmanuel@gmail.com'
+      storage: /etc/traefik/acme/acme.json
+      # https://docs.traefik.io/master/https/acme/#httpchallenge
+      httpChallenge:
+        entryPoint: web
+
+http:
+  routers:
+    web-secure-router:
+      rule: 'Host(`dev.zedasignal.com`)'
+      entryPoints:
+        - web-secure
+      middlewares:
+        - csrf
+      service: django
+      tls:
+        # https://docs.traefik.io/master/routing/routers/#certresolver
+        certResolver: letsencrypt
+
+    web-media-router:
+      rule: 'Host(`dev.zedasignal.com`) && PathPrefix(`/media/`)'
+      entryPoints:
+        - web-secure
+      middlewares:
+        - csrf
+      service: django-media
+      tls:
+        # https://docs.traefik.io/master/routing/routers/#certresolver
+        certResolver: letsencrypt
+
+    mailhog-router:   # Define a new router for MailHog
+      rule: 'Host(`dev.zedasignal.com:8025`)'
+      entryPoints:
+        - web
+      service: mailhog   # Route requests to the 'mailhog' service
+
+
+    # smsapi2email-router:   # Define a new router for smsapi2email
+    #   rule: 'Host(`smsapi2email.polymarqbackend.com`)'
+    #   entryPoints:
+    #     - web-secure   # Use the 'web-secure' entry point
+    #   service: smsapi2email   # Route requests to the 'smsapi2email' service
+
+  middlewares:
+    csrf:
+      # https://docs.traefik.io/master/middlewares/headers/#hostsproxyheaders
+      # https://docs.djangoproject.com/en/dev/ref/csrf/#ajax
+      headers:
+        hostsProxyHeaders: ['X-CSRFToken']
+
+  services:
+    django:
+      loadBalancer:
+        servers:
+          - url: http://django:5000
+
+    mailhog:
+      loadBalancer:
+        servers:
+          - url: http://mailhog:8025
+
+    django-media:
+      loadBalancer:
+        servers:
+          - url: http://nginx:80
+
+providers:
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true
