@@ -106,18 +106,18 @@ services:
   #     - '5555:5555'
   #   command: /start-flower
 
-  # traefik:
-  #   build:
-  #     context: .
-  #     dockerfile: ./compose/local/traefik/Dockerfile
-  #   image: zedasignal_backend_local_traefik
-  #   container_name: zedasignal_backend_local_traefik
-  #   depends_on:
-  #     - django
-  #     - mailhog
-  #   volumes:
-  #     - zedasignal_backend_local_traefik:/etc/traefik/acme
-  #   ports:
-  #     - "0.0.0.0:80:80"
-  #     - "0.0.0.0:8080:8080"
-  #     # - "0.0.0.0:8088:8080"
+  traefik:
+    build:
+      context: .
+      dockerfile: ./compose/local/traefik/Dockerfile
+    image: zedasignal_backend_local_traefik
+    container_name: zedasignal_backend_local_traefik
+    depends_on:
+      - django
+      - mailhog
+    volumes:
+      - zedasignal_backend_local_traefik:/etc/traefik/acme
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:8080:8080"
+      # - "0.0.0.0:8088:8080"

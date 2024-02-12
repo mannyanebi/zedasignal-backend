@@ -28,8 +28,6 @@ API_PATH_PREFIX = f"api/{API_VERSION}/"
 urlpatterns += [
     # API base url
     path(f"{API_PATH_PREFIX}auth/", include("config.auth_api_router")),
-    path(f"{API_PATH_PREFIX}trading/", include("zedasignal_backend.apps.trading.urls"), name="trading"),  # type: ignore # noqa: E501
-    path(f"{API_PATH_PREFIX}education/", include("zedasignal_backend.apps.education.urls"), name="education"),  # type: ignore # noqa: E501
     # DRF auth token
     # path("auth-token/", obtain_auth_token),
     path(f"{API_PATH_PREFIX}schema/", SpectacularAPIView.as_view(), name="api-schema"),  # type: ignore
