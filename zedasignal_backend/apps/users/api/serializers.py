@@ -1,8 +1,8 @@
+from typing import TypeVar
+
 from django.conf import settings
-from django.contrib.auth.password_validation import (
-    get_password_validators,
-    validate_password,
-)
+from django.contrib.auth.password_validation import get_password_validators, validate_password
+from drf_spectacular.utils import inline_serializer
 from rest_framework import serializers
 
 from zedasignal_backend.apps.users.models import Profile
@@ -12,6 +12,8 @@ from zedasignal_backend.apps.users.types import UserType
 from zedasignal_backend.apps.users.utils import get_custom_user_model
 
 User = get_custom_user_model()
+
+T = TypeVar("T", bound="serializers.Serializer")
 
 
 class UserFullNameField(serializers.CharField):
@@ -41,9 +43,7 @@ class PasswordField(serializers.CharField):
         # Validate the password using Django's validators
         validate_password(
             data,
-            password_validators=get_password_validators(
-                settings.AUTH_PASSWORD_VALIDATORS
-            ),
+            password_validators=get_password_validators(settings.AUTH_PASSWORD_VALIDATORS),
         )
         return data
 
@@ -74,7 +74,7 @@ class UserCreateSerializer(serializers.ModelSerializer[UserType]):
 
     class Meta:
         model = User
-        fields = ("email", "password", "phone_number", "full_name", "profile")
+        fields = ("email", "password", "phone_number", "full_name")
 
         extra_kwargs = {
             "username": {"required": False},
@@ -87,8 +87,6 @@ class UserCreateSerializer(serializers.ModelSerializer[UserType]):
             validated_data["first_name"] = full_name.get("first_name", "")
             validated_data["last_name"] = full_name.get("last_name", "")
 
-        profile_data = validated_data.pop("profile", None)
-
         user = User.user_manager.create_user(
             email=validated_data["email"],
             password=validated_data["password"],
@@ -97,11 +95,6 @@ class UserCreateSerializer(serializers.ModelSerializer[UserType]):
             username=validated_data.get("username", None),
             phone_number=validated_data.get("phone_number", ""),
         )
-
-        # Handle profile field
-        profile = UserProfileCreateSerializer(data=profile_data)
-        if profile.is_valid():
-            profile.save(user=user)
 
         return user
 
@@ -118,11 +111,6 @@ class UserProfileCreateSerializer(serializers.ModelSerializer[Profile]):
     def create(self, validated_data):
         profile = Profile.objects.create(**validated_data)
         return profile
-
-
-# This line dynamically adds the "profile" field to the "UserCreateSerializer" class, allowing the
-# field to reference the "UserProfileCreateSerializer," even if the latter is defined later in the file.
-UserCreateSerializer._declared_fields["profile"] = UserProfileCreateSerializer()
 
 
 class UserProfileReadSerializer(serializers.ModelSerializer[Profile]):
@@ -164,9 +152,7 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 class SuccessResponseSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=255)
     success = serializers.BooleanField(default=True)
-    result = serializers.DictField(
-        child=serializers.CharField(), allow_empty=True, read_only=True
-    )
+    result = serializers.DictField(child=serializers.CharField(), allow_empty=True, read_only=True)
 
 
 class ErrorResponseChildSerializer(serializers.Serializer):
@@ -178,6 +164,21 @@ class ErrorResponseChildSerializer(serializers.Serializer):
 class ErrorResponseSerializer(serializers.Serializer):
     success = serializers.BooleanField(default=False)
     error = serializers.ListField(child=ErrorResponseChildSerializer())
+
+
+def create_success_response_serializer(result_serializer: T) -> serializers.Serializer[T]:
+    """
+    Dynamically create a SuccessResponseSerializer with a result field
+    that uses the provided result_serializer.
+    """
+    return inline_serializer(
+        name="DynamicSuccessResponseSerializer",
+        fields={
+            "message": serializers.CharField(),
+            "success": serializers.BooleanField(default=True),
+            "result": result_serializer,
+        },
+    )
 
 
 # class TechnicianReadSerializer(serializers.ModelSerializer[Technician]):

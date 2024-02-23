@@ -1,9 +1,6 @@
 import environ
 from django.conf import settings
-from django_rest_passwordreset.serializers import (
-    EmailSerializer,
-    PasswordTokenSerializer,
-)
+from django_rest_passwordreset.serializers import EmailSerializer, PasswordTokenSerializer
 from django_rest_passwordreset.views import (
     ResetPasswordConfirm,
     ResetPasswordRequestToken,
@@ -37,17 +34,14 @@ from .serializers import (
     UserLoginSerializer,
     UserSerializer,
     VerifyUserSerializer,
+    create_success_response_serializer,
 )
 
 User = get_custom_user_model()
 env = environ.Env()
 
-HTTP_USER_AGENT_HEADER = getattr(
-    settings, "DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER", "HTTP_USER_AGENT"
-)
-HTTP_IP_ADDRESS_HEADER = getattr(
-    settings, "DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER", "REMOTE_ADDR"
-)
+HTTP_USER_AGENT_HEADER = getattr(settings, "DJANGO_REST_PASSWORDRESET_HTTP_USER_AGENT_HEADER", "HTTP_USER_AGENT")
+HTTP_IP_ADDRESS_HEADER = getattr(settings, "DJANGO_REST_PASSWORDRESET_IP_ADDRESS_HEADER", "REMOTE_ADDR")
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
@@ -107,9 +101,7 @@ class VerifyUserAccount(APIView):
         description="Verify a user account",
     )
     def post(self, request):
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
+        serializer = self.serializer_class(data=request.data, context={"request": request})
 
         serializer.is_valid(raise_exception=True)
 
@@ -117,9 +109,7 @@ class VerifyUserAccount(APIView):
         code = serializer.validated_data["code"]
 
         if len(code) != 6:
-            return ErrorResponse(
-                details="Invalid code format", status=status.HTTP_400_BAD_REQUEST
-            )
+            return ErrorResponse(details="Invalid code format", status=status.HTTP_400_BAD_REQUEST)
 
         verification_codes = VerificationCode.objects.filter(email=email)
 
@@ -134,9 +124,7 @@ class VerifyUserAccount(APIView):
             raise ValidationError("Invalid verification code")
 
         if verification_code.used:
-            return ErrorResponse(
-                details="Code already used", status=status.HTTP_400_BAD_REQUEST
-            )
+            return ErrorResponse(details="Code already used", status=status.HTTP_400_BAD_REQUEST)
 
         # mark code as used
         verification_code.used = True
@@ -146,9 +134,7 @@ class VerifyUserAccount(APIView):
         # delete all verification codes for this email
         other_user_verification_code.delete()
 
-        return SuccessResponse(
-            message="User account verified", status=status.HTTP_200_OK
-        )
+        return SuccessResponse(message="User account verified", status=status.HTTP_200_OK)
 
 
 class SendVerificationCode(APIView):
@@ -186,9 +172,7 @@ class SendVerificationCode(APIView):
             context=context,
         )
 
-        return SuccessResponse(
-            message="Verification code sent successfully", status=status.HTTP_200_OK
-        )
+        return SuccessResponse(message="Verification code sent successfully", status=status.HTTP_200_OK)
 
 
 class UserLoginView(APIView):
@@ -198,19 +182,18 @@ class UserLoginView(APIView):
 
     @extend_schema(
         request=serializer_class,
-        responses={200: SuccessResponseSerializer, 400: ErrorResponseSerializer},
+        responses={
+            200: create_success_response_serializer(UserSerializer()),
+            400: ErrorResponseSerializer,
+        },
         tags=["Auth"],
         description="Login a user",
     )
     def post(self, request):
-        serializer = self.serializer_class(
-            data=request.data, context={"request": request}
-        )
+        serializer = self.serializer_class(data=request.data, context={"request": request})
 
         if not serializer.is_valid():
-            return ErrorResponse(
-                details=serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+            return ErrorResponse(details=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         email = serializer.validated_data.get("email")
         password = serializer.validated_data.get("password")
@@ -243,9 +226,7 @@ class UserLoginView(APIView):
             "tokens": {**tokens},
         }
 
-        return SuccessResponse(
-            data=response_data, message="Login successful", status=status.HTTP_200_OK
-        )
+        return SuccessResponse(data=response_data, message="Login successful", status=status.HTTP_200_OK)
 
 
 class UserLogoutView(APIView):
@@ -338,9 +319,7 @@ class CustomResetPasswordConfirm(APIView):
     def post(self, request, *args, **kwargs):
         # Call the existing view
         reset_password_confirm_view = ResetPasswordConfirm.as_view()
-        response = reset_password_confirm_view(
-            request=request._request, *args, **kwargs
-        )
+        response = reset_password_confirm_view(request=request._request, *args, **kwargs)
 
         if response.status_code == status.HTTP_200_OK:
             return SuccessResponse(
@@ -378,9 +357,7 @@ class CustomResetPasswordValidateToken(APIView):
     def post(self, request, *args, **kwargs):
         # Call the existing view
         reset_password_validate_token_view = ResetPasswordValidateToken.as_view()
-        response = reset_password_validate_token_view(
-            request=request._request, *args, **kwargs
-        )
+        response = reset_password_validate_token_view(request=request._request, *args, **kwargs)
 
         if response.status_code == status.HTTP_200_OK:
             return SuccessResponse(

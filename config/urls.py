@@ -11,9 +11,7 @@ API_VERSION = "v1"
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
-    path(
-        "about/", TemplateView.as_view(template_name="pages/about.html"), name="about"
-    ),
+    path("about/", TemplateView.as_view(template_name="pages/about.html"), name="about"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
@@ -28,8 +26,6 @@ API_PATH_PREFIX = f"api/{API_VERSION}/"
 urlpatterns += [
     # API base url
     path(f"{API_PATH_PREFIX}auth/", include("config.auth_api_router")),
-    # DRF auth token
-    # path("auth-token/", obtain_auth_token),
     path(f"{API_PATH_PREFIX}schema/", SpectacularAPIView.as_view(), name="api-schema"),  # type: ignore
     path(
         f"{API_PATH_PREFIX}docs/",
