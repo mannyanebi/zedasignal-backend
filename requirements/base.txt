@@ -29,3 +29,6 @@ drf-spectacular==0.26.4  # https://github.com/tfranzel/drf-spectacular
 phonenumbers==8.13.22
 django-money==3.3.0 # https://github.com/django-money/django-money
 django-tinymce4-lite @ https://github.com/mannyanebi/django-tinymce4-lite/archive/master.tar.gz
+
+# Model Fields
+django-jsonform==2.21.2

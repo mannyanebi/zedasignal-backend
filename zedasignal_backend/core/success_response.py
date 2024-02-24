@@ -29,9 +29,3 @@ class SuccessResponse(Response):
             "result": data if data is not None else {},
         }
         super().__init__(data=success_data, status=status)
-
-
-class SuccessResponseSerializer(serializers.Serializer):
-    message = serializers.CharField(max_length=255)
-    success = serializers.BooleanField(default=True)
-    result = serializers.DictField(child=serializers.CharField(), allow_empty=True, read_only=True)

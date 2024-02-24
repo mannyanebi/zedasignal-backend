@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
 from zedasignal_backend.apps.users.managers import CustomUserManager
 from zedasignal_backend.core.mixins import CreatedAndUpdatedAtMixin, CreatedAtMixin
 from zedasignal_backend.core.utils.main import generate_numeric_code
@@ -17,9 +18,21 @@ class User(AbstractUser):
     check forms.SignupForm and forms.SocialSignupForms accordingly.
     """
 
+    USER = "user"
+    ADMIN = "admin"
+
+    class UserType(models.TextChoices):
+        USER = "user", _("User")
+        ADMIN = "admin", _("Admin")
+
     email = models.EmailField(_("email address"), unique=True, blank=True, null=True)
-    phone_number = models.CharField(
-        _("phone number"), blank=True, null=True, max_length=20
+    phone_number = models.CharField(_("phone number"), blank=True, null=True, max_length=20)
+    type = models.CharField(
+        _("type"),
+        max_length=5,
+        choices=UserType.choices,
+        default=UserType.USER,
+        help_text=_("The type of user."),
     )
 
     USERNAME_FIELD = "username"

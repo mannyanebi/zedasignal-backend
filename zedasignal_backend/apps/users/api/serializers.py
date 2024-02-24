@@ -171,8 +171,10 @@ def create_success_response_serializer(result_serializer: T) -> serializers.Seri
     Dynamically create a SuccessResponseSerializer with a result field
     that uses the provided result_serializer.
     """
+    # Use __class__.__name__ to get the name of the class of the result_serializer instance
+    serializer_class_name = result_serializer.__class__.__name__
     return inline_serializer(
-        name="DynamicSuccessResponseSerializer",
+        name=f"DynamicSuccessResponseSerializer{serializer_class_name}",
         fields={
             "message": serializers.CharField(),
             "success": serializers.BooleanField(default=True),

@@ -14,6 +14,7 @@ class UserType(models.Model):
     date_joined: datetime
     email: str
     phone_number: str
+    type: str
 
     class Meta:
         abstract = True

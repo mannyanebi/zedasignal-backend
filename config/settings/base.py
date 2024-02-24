@@ -83,11 +83,13 @@ THIRD_PARTY_APPS = [
     "django_rest_passwordreset",
     "djmoney",
     "tinymce",
+    "django_jsonform",
 ]
 
 LOCAL_APPS = [
     # Your stuff: custom apps go here
     "zedasignal_backend.apps.users",
+    "zedasignal_backend.apps.trading",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
