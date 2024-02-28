@@ -27,6 +27,7 @@ class User(AbstractUser):
 
     email = models.EmailField(_("email address"), unique=True, blank=True, null=True)
     phone_number = models.CharField(_("phone number"), blank=True, null=True, max_length=20)
+    nickname = models.CharField(_("nickname"), max_length=30, blank=True, null=True)
     type = models.CharField(
         _("type"),
         max_length=5,

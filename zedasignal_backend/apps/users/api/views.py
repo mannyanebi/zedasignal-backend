@@ -156,12 +156,12 @@ class SendVerificationCode(APIView):
         email = serializer.validated_data["email"]
 
         verification_code = VerificationCode.objects.create(email=email)
-        domain_name = env.str("DOMAIN_NAME")
+        domain = env.str("DOMAIN_NAME")
         context = {
             "email": email,
             "verification_code": verification_code.code,
             "request_datetime": verification_code.created_at,
-            "domain_name": domain_name,
+            "domain": domain,
         }
         user = DictToObject({"email": email})
         Sender(

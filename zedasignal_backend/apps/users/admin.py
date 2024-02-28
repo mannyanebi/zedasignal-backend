@@ -4,10 +4,7 @@ from django.contrib.auth import admin as auth_admin
 from django.contrib.auth import decorators, get_user_model
 
 from zedasignal_backend.apps.users import models
-from zedasignal_backend.apps.users.forms import (
-    UserAdminChangeForm,
-    UserAdminCreationForm,
-)
+from zedasignal_backend.apps.users.forms import UserAdminChangeForm, UserAdminCreationForm
 
 # from django.utils.translation import gettext_lazy as _
 
@@ -37,7 +34,13 @@ class CustomUserAdmin(auth_admin.UserAdmin):
     fieldsets = auth_admin.UserAdmin.fieldsets + (
         (
             "Other Information",
-            {"fields": ("phone_number",)},
+            {
+                "fields": (
+                    "phone_number",
+                    "nickname",
+                    "type",
+                )
+            },
         ),  # type: ignore
         # (
         #     _("Permissions"),

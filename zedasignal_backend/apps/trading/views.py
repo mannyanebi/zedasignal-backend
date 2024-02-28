@@ -1,13 +1,14 @@
-from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.views import APIView
 
-from zedasignal_backend.apps.trading.models import Signal
-from zedasignal_backend.apps.trading.serializers import SignalReadSerializer
-from zedasignal_backend.apps.users.api.serializers import (
-    ErrorResponseSerializer,
-    SuccessResponseSerializer,
-    create_success_response_serializer,
+from zedasignal_backend.apps.trading.models import Signal, SubscriptionPlan
+from zedasignal_backend.apps.trading.serializers import (
+    SignalReadSerializer,
+    SubscriptionPlanReadSerializer,
+    UserActiveSubscriptionPlanReadSerializer,
 )
+from zedasignal_backend.apps.users.api.serializers import ErrorResponseSerializer, create_success_response_serializer
+from zedasignal_backend.core.success_response import SuccessResponse
 from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
 
 # Create your views here.
@@ -31,7 +32,7 @@ from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
             200: create_success_response_serializer(SignalReadSerializer()),
             404: ErrorResponseSerializer,
         },
-        tags=["Signals"],
+        tags=["Trading"],
         operation_id="ListSignals",
         description="List all signals.",
     ),
@@ -40,7 +41,7 @@ from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
             200: create_success_response_serializer(SignalReadSerializer()),
             404: ErrorResponseSerializer,
         },
-        tags=["Signals"],
+        tags=["Trading"],
         operation_id="RetrieveSignal",
         description="Retrieve a signal.",
     ),
@@ -53,3 +54,65 @@ class SignalModelViewSet(CustomReadOnlyViewSet):
     serializer_class = SignalReadSerializer
     queryset = Signal.objects.filter(is_active=True)
     lookup_field = "uuid"
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses={
+            200: create_success_response_serializer(SubscriptionPlanReadSerializer()),
+            404: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        operation_id="ListSubscriptionPlans",
+        description="List all subscription plans.",
+    ),
+    retrieve=extend_schema(
+        responses={
+            200: create_success_response_serializer(SubscriptionPlanReadSerializer()),
+            404: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        operation_id="RetrieveSubscriptionPlan",
+        description="Retrieve a subscription plan.",
+    ),
+)
+class SubscriptionPlanViewSet(CustomReadOnlyViewSet):
+    """
+    Subscription plan viewset for Zedasignal Backend.
+    """
+
+    serializer_class = SubscriptionPlanReadSerializer
+    queryset = SubscriptionPlan.objects.filter(is_active=True)
+    lookup_field = "uuid"
+
+
+class UserActiveSubscriptionPlans(APIView):
+    """
+    User active subscription plans view for Zedasignal Backend.
+    """
+
+    serializer_class = UserActiveSubscriptionPlanReadSerializer
+
+    @extend_schema(
+        operation_id="UserActiveSubscriptionPlan",
+        responses={
+            200: create_success_response_serializer(UserActiveSubscriptionPlanReadSerializer()),
+            400: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        description="Get user active subscription plans.",
+    )
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        all_subscriptions = SubscriptionPlan.objects.all()
+        user_subscriptions = user.subscriptions.filter(is_active=True)
+
+        subscription_status_list = [
+            {
+                "plan": SubscriptionPlanReadSerializer(plan).data,
+                "active": user_subscriptions.filter(plan_id=plan.id).exists(),
+            }
+            for plan in all_subscriptions
+        ]
+
+        return SuccessResponse(data=subscription_status_list, message="User active subscription plans.")

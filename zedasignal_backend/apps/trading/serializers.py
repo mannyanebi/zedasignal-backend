@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from zedasignal_backend.apps.users.api.serializers import UserSerializer
 
-from .models import Signal
+from .models import Signal, SubscriptionPlan
 
 
 class SignalReadSerializer(serializers.ModelSerializer[Signal]):
@@ -10,4 +10,21 @@ class SignalReadSerializer(serializers.ModelSerializer[Signal]):
 
     class Meta:
         model = Signal
-        exclude = ("id",)
+        exclude = (
+            "id",
+            "targets",
+        )
+
+
+class SubscriptionPlanReadSerializer(serializers.ModelSerializer[SubscriptionPlan]):
+    class Meta:
+        model = SubscriptionPlan
+        exclude = (
+            "id",
+            "creator",
+        )
+
+
+class UserActiveSubscriptionPlanReadSerializer(serializers.Serializer):
+    plan = SubscriptionPlanReadSerializer()
+    active = serializers.BooleanField()

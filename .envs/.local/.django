@@ -21,4 +21,4 @@ SMS2EMAILAPI_URL=http://zedasignal_backend_local_smsapi2email:8080/sms.do
 
 # DOMAIN NAME
 # ------------------------------------------------------------------------------
-DOMAIN_NAME=http://zedasignal-backend.localhost
+DOMAIN_NAME=http://localhost:8000
