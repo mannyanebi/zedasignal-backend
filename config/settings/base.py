@@ -365,7 +365,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "Zedasignal Backend Admin",
     "site_header": "Zedasignal Backend",
     "site_brand": "Zedasignal Backend",
-    "site_icon": "images/favicon.png",
+    "site_icon": "images/favicons/favicon.ico",
     # Add your own branding here
     "site_logo": None,
     "welcome_sign": "Welcome to the Zedasignal Backend Admin",
