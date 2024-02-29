@@ -1,4 +1,5 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 
 from zedasignal_backend.apps.trading.models import Signal, SubscriptionPlan
@@ -93,6 +94,7 @@ class SubscriptionPlanViewSet(CustomReadOnlyViewSet):
     serializer_class = SubscriptionPlanReadSerializer
     queryset = SubscriptionPlan.objects.filter(is_active=True)
     lookup_field = "uuid"
+    permission_classes = [AllowAny]
 
 
 class UserActiveSubscriptionPlans(APIView):
