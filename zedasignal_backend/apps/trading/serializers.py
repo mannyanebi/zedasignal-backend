@@ -16,6 +16,12 @@ class SignalReadSerializer(serializers.ModelSerializer[Signal]):
         )
 
 
+class SignalCreateSerializer(serializers.ModelSerializer[Signal]):
+    class Meta:
+        model = Signal
+        exclude = ("id", "uuid", "author", "targets", "is_active", "created_at", "updated_at")
+
+
 class SubscriptionPlanReadSerializer(serializers.ModelSerializer[SubscriptionPlan]):
     class Meta:
         model = SubscriptionPlan

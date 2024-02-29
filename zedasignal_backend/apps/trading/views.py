@@ -3,27 +3,36 @@ from rest_framework.views import APIView
 
 from zedasignal_backend.apps.trading.models import Signal, SubscriptionPlan
 from zedasignal_backend.apps.trading.serializers import (
+    SignalCreateSerializer,
     SignalReadSerializer,
     SubscriptionPlanReadSerializer,
     UserActiveSubscriptionPlanReadSerializer,
 )
 from zedasignal_backend.apps.users.api.serializers import ErrorResponseSerializer, create_success_response_serializer
+from zedasignal_backend.core.error_response import ErrorResponse
 from zedasignal_backend.core.success_response import SuccessResponse
 from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
 
+
 # Create your views here.
-# class AdminCreateSignal(APIView):
+class AdminCreateSignal(APIView):
+    serializer_class = SignalCreateSerializer
 
-
-#     @extend_schema(
-#         request=serializer_class,
-#         responses={
-#             200: create_success_response_serializer(UserSerializer()),
-#             400: ErrorResponseSerializer,
-#         },
-#         tags=["Signals"],
-#         description="",
-#     )
+    @extend_schema(
+        request=serializer_class,
+        responses={
+            200: create_success_response_serializer(SignalCreateSerializer()),
+            400: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        description="Create a signal.",
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if not serializer.is_valid():
+            return ErrorResponse(details=serializer.errors, status=400, message="Invalid data")
+        signal = serializer.save(author=request.user)
+        return SuccessResponse(data=self.serializer_class(signal).data, message="Signal created.")
 
 
 @extend_schema_view(
