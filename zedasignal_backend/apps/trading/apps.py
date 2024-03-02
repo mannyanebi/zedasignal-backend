@@ -6,3 +6,6 @@ class TradesConfig(AppConfig):
     name = "zedasignal_backend.apps.trading"
     verbose_name = _("Trading")
     default_auto_field = "django.db.models.BigAutoField"
+
+    def ready(self):
+        import zedasignal_backend.apps.trading.signals  # noqa
