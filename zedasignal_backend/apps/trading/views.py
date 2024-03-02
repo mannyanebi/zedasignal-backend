@@ -62,7 +62,7 @@ class SignalModelViewSet(CustomReadOnlyViewSet):
     """
 
     serializer_class = SignalReadSerializer
-    queryset = Signal.objects.filter(is_active=True)
+    queryset = Signal.objects.filter(is_active=True).order_by("-updated_at")
     lookup_field = "uuid"
 
 
@@ -92,7 +92,7 @@ class SubscriptionPlanViewSet(CustomReadOnlyViewSet):
     """
 
     serializer_class = SubscriptionPlanReadSerializer
-    queryset = SubscriptionPlan.objects.filter(is_active=True)
+    queryset = SubscriptionPlan.objects.filter(is_active=True).order_by("-updated_at")
     lookup_field = "uuid"
     permission_classes = [AllowAny]
 
@@ -115,7 +115,7 @@ class UserActiveSubscriptionPlans(APIView):
     )
     def get(self, request, *args, **kwargs):
         user = request.user
-        all_subscriptions = SubscriptionPlan.objects.all()
+        all_subscriptions = SubscriptionPlan.objects.all().order_by("-updated_at")
         user_subscriptions = user.subscriptions.filter(is_active=True)
 
         subscription_status_list = [
