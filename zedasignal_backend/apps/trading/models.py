@@ -168,12 +168,20 @@ class SubscriptionPlan(CreatedAndUpdatedAtMixin, UUIDMixin, models.Model):
         default=True,
         help_text=_("Designates whether this subscription plan is active."),
     )
+    ordering = models.PositiveIntegerField(
+        _("ordering"),
+        default=1,
+        help_text=_("The ordering of the subscription plan."),
+    )
     creator = models.ForeignKey(
         User,
         verbose_name=_("creator"),
         on_delete=models.CASCADE,
         related_name="subscription_plans_created",
     )
+
+    class Meta:
+        ordering = ["ordering"]
 
     def __str__(self):
         return self.name
