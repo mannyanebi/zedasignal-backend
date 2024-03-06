@@ -81,7 +81,20 @@ class UserRegistrationView(APIView):
         serializer = self.serializer_class(data=request.data)
 
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+
+        domain = env.str("DOMAIN_NAME")
+        context = {
+            "user": user,
+            "domain": domain,
+        }
+        Sender(
+            user,
+            email_content_object="notification.messages.registration_success_welcome",
+            html_template="emails/authentication/registration-welcome-message.html",
+            email_notif=True,
+            context=context,
+        )
 
         return SuccessResponse(
             message="User registered successfully",
