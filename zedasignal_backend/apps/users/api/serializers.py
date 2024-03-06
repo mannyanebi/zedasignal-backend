@@ -48,7 +48,7 @@ class PasswordField(serializers.CharField):
         return data
 
 
-class UserSerializer(serializers.ModelSerializer[UserType]):
+class UserSerializer(serializers.ModelSerializer[UserType | User]):
     class Meta:
         model = User
         exclude = (
@@ -166,7 +166,9 @@ class ErrorResponseSerializer(serializers.Serializer):
     error = serializers.ListField(child=ErrorResponseChildSerializer())
 
 
-def create_success_response_serializer(result_serializer: T) -> serializers.Serializer[T]:
+def create_success_response_serializer(
+    result_serializer: T,
+) -> serializers.Serializer[T]:
     """
     Dynamically create a SuccessResponseSerializer with a result field
     that uses the provided result_serializer.

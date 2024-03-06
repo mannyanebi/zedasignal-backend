@@ -19,7 +19,15 @@ class SignalReadSerializer(serializers.ModelSerializer[Signal]):
 class SignalCreateSerializer(serializers.ModelSerializer[Signal]):
     class Meta:
         model = Signal
-        exclude = ("id", "uuid", "author", "targets", "is_active", "created_at", "updated_at")
+        exclude = (
+            "id",
+            "uuid",
+            "author",
+            "targets",
+            "is_active",
+            "created_at",
+            "updated_at",
+        )
 
 
 class SubscriptionPlanReadSerializer(serializers.ModelSerializer[SubscriptionPlan]):
@@ -34,3 +42,8 @@ class SubscriptionPlanReadSerializer(serializers.ModelSerializer[SubscriptionPla
 class UserActiveSubscriptionPlanReadSerializer(serializers.Serializer):
     plan = SubscriptionPlanReadSerializer()
     active = serializers.BooleanField()
+
+
+class UserAndActiveSubscriptionPlanReadSerializer(serializers.Serializer):
+    user = UserSerializer()
+    subscription_plan = SubscriptionPlanReadSerializer()

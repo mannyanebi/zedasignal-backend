@@ -6,12 +6,18 @@ from zedasignal_backend.apps.trading.views import (
     SignalModelViewSet,
     SubscriptionPlanViewSet,
     UserActiveSubscriptionPlans,
+    UsersAndActiveSubscriptionPlansViewSet,
 )
 
 router = SimpleRouter()
 
-router.register("signals", SignalModelViewSet)
-router.register("subscription-plans", SubscriptionPlanViewSet)
+router.register("signals", SignalModelViewSet, basename="signals")
+router.register("subscription-plans", SubscriptionPlanViewSet, basename="subscription-plans")
+router.register(
+    "users-and-active-subscription-plans",
+    UsersAndActiveSubscriptionPlansViewSet,
+    basename="users-and-active-subscription-plans",
+)
 _urlpatterns = [
     path(
         "user-active-subscription-plans/",

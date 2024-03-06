@@ -1,3 +1,5 @@
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
@@ -8,11 +10,16 @@ from zedasignal_backend.apps.trading.serializers import (
     SignalReadSerializer,
     SubscriptionPlanReadSerializer,
     UserActiveSubscriptionPlanReadSerializer,
+    UserAndActiveSubscriptionPlanReadSerializer,
 )
 from zedasignal_backend.apps.users.api.serializers import ErrorResponseSerializer, create_success_response_serializer
+from zedasignal_backend.apps.users.utils import get_custom_user_model
+from zedasignal_backend.core.custom_view_pagination import CustomPageNumberPagination
 from zedasignal_backend.core.error_response import ErrorResponse
 from zedasignal_backend.core.success_response import SuccessResponse
 from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
+
+User = get_custom_user_model()
 
 
 # Create your views here.
@@ -92,7 +99,7 @@ class SubscriptionPlanViewSet(CustomReadOnlyViewSet):
     """
 
     serializer_class = SubscriptionPlanReadSerializer
-    queryset = SubscriptionPlan.objects.filter(is_active=True)
+    queryset = SubscriptionPlan.objects.filter(Q(is_active=True) | Q(coming_soon=True))
     lookup_field = "uuid"
     permission_classes = [AllowAny]
 
@@ -127,3 +134,59 @@ class UserActiveSubscriptionPlans(APIView):
         ]
 
         return SuccessResponse(data=subscription_status_list, message="User active subscription plans.")
+
+
+@extend_schema_view(
+    list=extend_schema(
+        responses={
+            200: create_success_response_serializer(UserAndActiveSubscriptionPlanReadSerializer()),
+            404: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        operation_id="ListUsersAndActiveSubscriptionPlans",
+        description="List all users and their active subscription plans.",
+    ),
+    retrieve=extend_schema(
+        responses={
+            200: create_success_response_serializer(UserAndActiveSubscriptionPlanReadSerializer()),
+            404: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        operation_id="RetrieveUserAndActiveSubscriptionPlan",
+        description="Retrieve a user and their active subscription plan.",
+    ),
+)
+class UsersAndActiveSubscriptionPlansViewSet(CustomReadOnlyViewSet):
+    """
+    Users and active subscription plans viewset for Zedasignal Backend.
+    """
+
+    serializer_class = UserAndActiveSubscriptionPlanReadSerializer
+    pagination_class = CustomPageNumberPagination
+    lookup_field = "uuid"
+
+    def get_object(self):
+        user = get_object_or_404(User, uuid=self.request.query_params.get("uuid"))
+        subscription_plan: SubscriptionPlan | None = user.subscriptions.filter(is_active=True).first()  # type: ignore
+
+        return {
+            "user": user,
+            "subscription_plan": subscription_plan,
+        }
+
+    def get_queryset(self):
+        users = User.objects.prefetch_related("subscriptions").filter(type=User.USER)
+
+        users_and_active_subscription_plan_list = [
+            {
+                "user": user,
+                "subscription_plan": (
+                    user.subscriptions.filter(is_active=True).first().plan  # type: ignore
+                    if user.subscriptions.filter(is_active=True).exists()  # type: ignore
+                    else None
+                ),
+            }
+            for user in users
+        ]
+
+        return users_and_active_subscription_plan_list

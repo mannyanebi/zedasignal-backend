@@ -168,6 +168,11 @@ class SubscriptionPlan(CreatedAndUpdatedAtMixin, UUIDMixin, models.Model):
         default=True,
         help_text=_("Designates whether this subscription plan is active."),
     )
+    coming_soon = models.BooleanField(
+        _("coming soon"),
+        default=False,
+        help_text=_("Designates whether this subscription plan is coming soon."),
+    )
     ordering = models.PositiveIntegerField(
         _("ordering"),
         default=1,
