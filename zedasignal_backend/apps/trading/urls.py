@@ -4,6 +4,7 @@ from rest_framework.routers import SimpleRouter
 from zedasignal_backend.apps.trading.views import (
     AdminActivateUserSubscription,
     AdminCreateSignal,
+    AdminDashboardStatisticsView,
     SignalModelViewSet,
     SubscriptionPlanViewSet,
     UserActiveSubscriptionPlans,
@@ -31,5 +32,10 @@ _urlpatterns = [
         AdminActivateUserSubscription.as_view(),  # type: ignore
         name="activate-user-subscription-plan",
     ),  # type: ignore
+    path(
+        "admin-dashboard-statistics/",
+        AdminDashboardStatisticsView.as_view(),  # type: ignore
+        name="admin-dashboard-statistics",
+    ),
 ]
 urlpatterns = router.urls + _urlpatterns

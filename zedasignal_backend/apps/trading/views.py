@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from zedasignal_backend.apps.trading.decorators import user_has_active_subscription
 from zedasignal_backend.apps.trading.models import Signal, SubscriptionPlan
 from zedasignal_backend.apps.trading.serializers import (
+    AdminDashboardStatistics,
     CreateUserSubscriptionSerializer,
     SignalCreateSerializer,
     SignalReadSerializer,
@@ -249,4 +250,49 @@ class AdminActivateUserSubscription(APIView):
 
         return SuccessResponse(
             message="User subscription activated.",
+        )
+
+
+class AdminDashboardStatisticsView(APIView):
+    """
+    Admin dashboard statistics view for Zedasignal Backend.
+    """
+
+    serializer_class = AdminDashboardStatistics
+
+    @extend_schema(
+        operation_id="AdminDashboardStatistics",
+        responses={
+            200: create_success_response_serializer(AdminDashboardStatistics()),
+            400: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        description="Get admin dashboard statistics.",
+    )
+    @admin_required
+    def get(self, request, *args, **kwargs):
+        total_users = User.objects.filter(type=User.USER).count()
+        # total_active_users = User.objects.filter(is_active=True).count()
+        # total_inactive_users = User.objects.filter(is_active=False).count()
+        total_signals_provided = Signal.objects.count()
+        # total_active_signals = Signal.objects.filter(is_active=True).count()
+        # total_inactive_signals = Signal.objects.filter(is_active=False).count()
+        # total_subscription_plans = SubscriptionPlan.objects.count()
+        # total_active_subscription_plans = SubscriptionPlan.objects.filter(
+        #     is_active=True
+        # ).count()
+        # total_inactive_subscription_plans = SubscriptionPlan.objects.filter(
+        #     is_active=False
+        # ).count()
+        total_active_subscriptions = SubscriptionPlan.objects.filter(is_active=True).count()
+        total_admins = User.objects.filter(type=User.ADMIN).count()
+
+        return SuccessResponse(
+            data={
+                "total_users": total_users,
+                "total_signals_provided": total_signals_provided,
+                "total_active_subscriptions": total_active_subscriptions,
+                "total_admins": total_admins,
+            },
+            message="Admin dashboard statistics.",
         )

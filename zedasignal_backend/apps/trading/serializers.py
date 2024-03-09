@@ -75,3 +75,10 @@ class CreateUserSubscriptionSerializer(serializers.ModelSerializer[Subscription]
             "start_timestamp",
             "end_timestamp",
         )
+
+
+class AdminDashboardStatistics(serializers.Serializer):
+    total_users = serializers.IntegerField()
+    total_signals_provided = serializers.IntegerField()
+    total_active_subscriptions = serializers.IntegerField()
+    total_admins = serializers.IntegerField()

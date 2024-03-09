@@ -63,7 +63,7 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
 class UserRegistrationView(APIView):
     serializer_class = UserCreateSerializer
     permission_classes = [AllowAny]
-    # throttle_scope = "high_critical_actions"
+    throttle_scope = "high_critical_actions"
 
     @extend_schema(
         request=serializer_class,
