@@ -55,7 +55,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           source: "."
-          target: "~/polymarq_backend"
+          target: "~/zedasignal-backend"
 
       - name: Build and Deploy the Stack
         uses: appleboy/ssh-action@master

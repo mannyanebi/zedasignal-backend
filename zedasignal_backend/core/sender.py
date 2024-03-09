@@ -1,9 +1,9 @@
 from importlib import import_module
 
-from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from zedasignal_backend.core.utils.main import send_sms_using_proxy_server
+
+from zedasignal_backend.core.termii.termii import Termii
 
 
 class Sender:
@@ -52,22 +52,16 @@ class Sender:
         assert self.email_content_object is not None, "Email content object is required"
         file = import_module(self.email_content_object).MyMessages
 
-        self.email_subject = (
-            str(file.EMAIL_SUBJECT) if file.EMAIL_SUBJECT else "New Message"
-        )
+        self.email_subject = str(file.EMAIL_SUBJECT) if file.EMAIL_SUBJECT else "New Message"
         self.email_from = (
             str(file.FROM_ADDRESS)
             if getattr(file, "FROM_ADDRESS", None)
             else "Zedasignal Notifier <noreply@zedasignal.com>"
         )
 
-        self.email_message = (
-            None if not hasattr(file, "EMAIL_MESSAGE") else file.EMAIL_MESSAGE
-        )
+        self.email_message = None if not hasattr(file, "EMAIL_MESSAGE") else file.EMAIL_MESSAGE
 
-        self.template_name = (
-            self.html_template if self.html_template else "email/base.html"
-        )
+        self.template_name = self.html_template if self.html_template else "email/base.html"
 
         subject = self.email_subject
         context = (
@@ -91,21 +85,9 @@ class Sender:
         return "Mail sent"
 
     def sms(self):
-        # for now we'll mock sms sending using sms2emailapi service
-        if settings.USE_SMS2EMAILAPI:
-            sms_response = send_sms_using_proxy_server(
-                {
-                    "username": settings.SMS2EMAILAPI_USERNAME,
-                    "from_": settings.SMS2EMAILAPI_FROM,
-                    "to": self.user_account.phone_number,
-                    "message": self.sms_message,
-                }
-            )
-            if sms_response.status_code == 200:
-                return "SMS sent"
-
-        # NOTE: We'd have the implementation for sending SMS using
-        # Twilio or some other SMS provider here
+        termii = Termii()
+        termii.send_sms(to=self.user_account.phone_number, message=self.sms_message)
+        return "SMS sent"
 
     def push(self):
         pass

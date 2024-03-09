@@ -10,6 +10,7 @@ from zedasignal_backend.apps.users.types import UserType
 
 # from django.contrib.auth import get_user_model
 from zedasignal_backend.apps.users.utils import get_custom_user_model
+from zedasignal_backend.core.utils.main import normalize_phone_number
 
 User = get_custom_user_model()
 
@@ -48,6 +49,19 @@ class PasswordField(serializers.CharField):
         return data
 
 
+class UserPhoneNumberSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=20, required=True)
+
+    def validate_phone_number(self, value):
+        if not value.startswith("+"):
+            raise serializers.ValidationError("Phone number must start with a '+'")
+
+        try:
+            return normalize_phone_number(value)
+        except ValueError as val_exc:
+            raise serializers.ValidationError(str(val_exc))
+
+
 class UserSerializer(serializers.ModelSerializer[UserType | User]):
     class Meta:
         model = User
@@ -68,7 +82,7 @@ class UserSerializer(serializers.ModelSerializer[UserType | User]):
         # }
 
 
-class UserCreateSerializer(serializers.ModelSerializer[UserType]):
+class UserCreateSerializer(UserPhoneNumberSerializer, serializers.ModelSerializer[UserType]):
     password = PasswordField(write_only=True)
     full_name = UserFullNameField(write_only=True, required=False)
 

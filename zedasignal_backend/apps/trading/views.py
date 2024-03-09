@@ -1,5 +1,6 @@
 from typing import Any
 
+import environ
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -23,10 +24,12 @@ from zedasignal_backend.apps.users.utils import get_custom_user_model
 from zedasignal_backend.core.custom_view_pagination import CustomPageNumberPagination
 from zedasignal_backend.core.decorators import admin_required
 from zedasignal_backend.core.error_response import ErrorResponse
+from zedasignal_backend.core.sender import Sender
 from zedasignal_backend.core.success_response import SuccessResponse
 from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
 
 User = get_custom_user_model()
+env = environ.Env()
 
 
 # Create your views here.
@@ -229,7 +232,20 @@ class AdminActivateUserSubscription(APIView):
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return ErrorResponse(details=serializer.errors, status=400, message="Invalid data")
-        serializer.save(created_by=request.user)
+        subscription = serializer.save(created_by=request.user)
+        domain = env.str("DOMAIN_NAME")
+        Sender(
+            subscription.user,
+            email_content_object="notification.messages.subscription_activation",
+            html_template="emails/trading/subscription/activation-notification.html",
+            email_notif=True,
+            context={
+                "subscription_plan": subscription.plan,
+                "subscription": subscription,
+                "user": subscription.user,
+                "domain": domain,
+            },
+        )
 
         return SuccessResponse(
             message="User subscription activated.",
