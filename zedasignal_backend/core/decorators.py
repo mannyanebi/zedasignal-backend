@@ -2,8 +2,10 @@
 
 from rest_framework import status
 
-from zedasignal_backend.apps.users.models import User
+from zedasignal_backend.apps.users.utils import get_custom_user_model
 from zedasignal_backend.core.error_response import ErrorResponse
+
+User = get_custom_user_model()
 
 # def client_required():
 #     """
@@ -39,7 +41,7 @@ def admin_required(function=None):
     else returns a 403 Forbidden response.
     """
 
-    user_is_admin = lambda user: user.type == User.ADMIN and user.is_active and user.is_verified  # type: ignore # noqa: E731, E501
+    user_is_admin = lambda user: user.type == User.ADMIN and user.is_active  # type: ignore # noqa: E731, E501
 
     def _wrapped_view(self, request, *args, **kwargs):
         if user_is_admin(request.user):

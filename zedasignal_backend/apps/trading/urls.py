@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from zedasignal_backend.apps.trading.views import (
+    AdminActivateUserSubscription,
     AdminCreateSignal,
     SignalModelViewSet,
     SubscriptionPlanViewSet,
@@ -25,5 +26,10 @@ _urlpatterns = [
         name="user-active-subscription-plans",
     ),  # noqa
     path("create-signal/", AdminCreateSignal.as_view(), name="create-signal"),  # type: ignore
+    path(
+        "activate-user-subscription-plan/",
+        AdminActivateUserSubscription.as_view(),  # type: ignore
+        name="activate-user-subscription-plan",
+    ),  # type: ignore
 ]
 urlpatterns = router.urls + _urlpatterns

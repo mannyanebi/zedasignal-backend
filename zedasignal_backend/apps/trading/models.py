@@ -227,6 +227,14 @@ class Subscription(CreatedAndUpdatedAtMixin, UUIDMixin, models.Model):
         default=True,
         help_text=_("Designates whether this subscription is active."),
     )
+    created_by = models.ForeignKey(
+        User,
+        verbose_name=_("created by"),
+        on_delete=models.CASCADE,
+        null=True,
+        blank=False,
+        related_name="subscriptions_created",
+    )
 
     def __str__(self):
         return f"{self.user} - {self.plan}"

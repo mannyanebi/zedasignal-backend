@@ -1,11 +1,17 @@
+from typing import Any
+
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from zedasignal_backend.apps.trading.decorators import user_has_active_subscription
 from zedasignal_backend.apps.trading.models import Signal, SubscriptionPlan
 from zedasignal_backend.apps.trading.serializers import (
+    CreateUserSubscriptionSerializer,
     SignalCreateSerializer,
     SignalReadSerializer,
     SubscriptionPlanReadSerializer,
@@ -15,6 +21,7 @@ from zedasignal_backend.apps.trading.serializers import (
 from zedasignal_backend.apps.users.api.serializers import ErrorResponseSerializer, create_success_response_serializer
 from zedasignal_backend.apps.users.utils import get_custom_user_model
 from zedasignal_backend.core.custom_view_pagination import CustomPageNumberPagination
+from zedasignal_backend.core.decorators import admin_required
 from zedasignal_backend.core.error_response import ErrorResponse
 from zedasignal_backend.core.success_response import SuccessResponse
 from zedasignal_backend.core.views_mixins import CustomReadOnlyViewSet
@@ -71,6 +78,14 @@ class SignalModelViewSet(CustomReadOnlyViewSet):
     serializer_class = SignalReadSerializer
     queryset = Signal.objects.filter(is_active=True).order_by("-updated_at")
     lookup_field = "uuid"
+
+    @user_has_active_subscription
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @user_has_active_subscription
+    def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        return super().retrieve(request, *args, **kwargs)
 
 
 @extend_schema_view(
@@ -179,6 +194,7 @@ class UsersAndActiveSubscriptionPlansViewSet(CustomReadOnlyViewSet):
 
         users_and_active_subscription_plan_list = [
             {
+                "id": index + 1,  # Increment id starting from 1
                 "user": user,
                 "subscription_plan": (
                     user.subscriptions.filter(is_active=True).first().plan  # type: ignore
@@ -186,7 +202,35 @@ class UsersAndActiveSubscriptionPlansViewSet(CustomReadOnlyViewSet):
                     else None
                 ),
             }
-            for user in users
+            for index, user in enumerate(users)  # Use enumerate to get the index
         ]
 
         return users_and_active_subscription_plan_list
+
+
+class AdminActivateUserSubscription(APIView):
+    """
+    Activate user subscription view for Zedasignal Backend.
+    """
+
+    serializer_class = CreateUserSubscriptionSerializer
+
+    @extend_schema(
+        operation_id="ActivateUserSubscriptionPlan",
+        responses={
+            200: create_success_response_serializer(CreateUserSubscriptionSerializer()),
+            400: ErrorResponseSerializer,
+        },
+        tags=["Trading"],
+        description="Get activate user subscription plan.",
+    )
+    @admin_required
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if not serializer.is_valid():
+            return ErrorResponse(details=serializer.errors, status=400, message="Invalid data")
+        serializer.save(created_by=request.user)
+
+        return SuccessResponse(
+            message="User subscription activated.",
+        )

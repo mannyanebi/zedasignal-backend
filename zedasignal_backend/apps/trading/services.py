@@ -87,6 +87,17 @@ class SignalService:
         )
 
     @staticmethod
+    def send_signal_to_subscribers_by_sms(signal: Signal, users: list[User] | QuerySet[User]):
+        """
+        This method sends a signal to subscribers by sms.
+
+        Args:
+            signal (Signal): The signal to be sent.
+            users (List[User] | QuerySet[User]): The list of users to send the signal to.
+        """
+        pass
+
+    @staticmethod
     def publish_signal_to_active_subscribers_by_email(signal: Signal):
         """
         This method publishes a signal to active subscribers by email.
@@ -98,3 +109,15 @@ class SignalService:
         users = SignalService.fetch_active_subscriptions_users_by_channel("email")
 
         SignalService.send_signal_to_subscribers_by_email(signal, users)
+
+    @staticmethod
+    def publish_signal_to_active_subscribers_by_sms(signal: Signal):
+        """
+        This method publishes a signal to active subscribers by sms.
+
+        Args:
+            signal (Signal): The signal to be published.
+        """
+        users = SignalService.fetch_active_subscriptions_users_by_channel("sms")
+
+        # for user in users:
