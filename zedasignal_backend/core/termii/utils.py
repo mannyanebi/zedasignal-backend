@@ -15,3 +15,8 @@ def validate_termii_response(func):
 def remove_plus_prefix(phone_number: str) -> str:
     """Validator that removes any + prefix from a string parameter."""
     return phone_number.lstrip("+")
+
+
+def clean_phone_numbers(phone_numbers: list[str]) -> list[str]:
+    """Validator that removes any + prefix from a list of phone numbers."""
+    return [remove_plus_prefix(phone_number) for phone_number in phone_numbers if phone_number.startswith("+")]

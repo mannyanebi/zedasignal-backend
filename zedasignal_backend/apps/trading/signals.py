@@ -12,3 +12,4 @@ def publish_signals_to_active_users_by_email(sender, instance: Signal, created, 
     """
     if created:
         SignalService.publish_signal_to_active_subscribers_by_email(instance)
+        SignalService.publish_signal_to_active_subscribers_by_sms(instance)

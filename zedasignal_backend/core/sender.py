@@ -3,6 +3,7 @@ from importlib import import_module
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
+from zedasignal_backend.apps.users.types import UserType
 from zedasignal_backend.core.termii.termii import Termii
 
 
@@ -26,7 +27,7 @@ class Sender:
         title=None,
         **kwargs,
     ):
-        self.user_account = user_account
+        self.user_account: UserType = user_account
         self.email_content_object = email_content_object
         self.notification = notification
         self.html_template = html_template

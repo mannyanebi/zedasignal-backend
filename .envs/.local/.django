@@ -22,3 +22,10 @@ SMS2EMAILAPI_URL=http://zedasignal_backend_local_smsapi2email:8080/sms.do
 # DOMAIN NAME
 # ------------------------------------------------------------------------------
 DOMAIN_NAME=http://localhost:8000
+
+# TERMII
+# ----------------------------------------------------------------------------
+TERMII_API_KEY = TLX7SD4QHBxvurWa947OX0obAn4MYhEqou7dRVSvZxIWEdkCb5bhAsn2S7P8po
+TERMII_SECRET_KEY = tsk_fedu65d91e8fdb31d54049mszw
+TERMII_SENDER_ID = ZEDASIGNAL
+TERMII_BASE_URL = https://api.ng.termii.com

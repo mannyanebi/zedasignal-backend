@@ -378,7 +378,11 @@ JAZZMIN_SETTINGS = {
     # Links to put along the top menu
     "topmenu_links": [
         # Url that gets reversed (Permissions can be added)
-        {"name": "Zedasignal Backend", "url": "home", "permissions": ["auth.view_user"]},
+        {
+            "name": "Zedasignal Backend",
+            "url": "home",
+            "permissions": ["auth.view_user"],
+        },
         # model admin to link to (Permissions checked against model)
         {"model": "users.User"},  # pylint: disable=hard-coded-auth-user
     ],
@@ -455,3 +459,10 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 
 # views default page size
 DEFAULT_PAGE_SIZE = 50
+
+
+# Termii Settings
+# ------------------------------------------------------------------------------
+TERMII_BASE_URL = env.str("TERMII_BASE_URL")
+TERMII_SENDER_ID = env.str("TERMII_SENDER_ID")
+TERMII_API_KEY = env.str("TERMII_API_KEY")

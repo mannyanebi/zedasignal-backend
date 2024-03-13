@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from zedasignal_backend.apps.trading.decorators import user_has_active_subscription
+from zedasignal_backend.apps.trading.decorators import user_has_active_subscription_or_is_admin
 from zedasignal_backend.apps.trading.models import Signal, SubscriptionPlan
 from zedasignal_backend.apps.trading.serializers import (
     AdminDashboardStatistics,
@@ -83,11 +83,11 @@ class SignalModelViewSet(CustomReadOnlyViewSet):
     queryset = Signal.objects.filter(is_active=True).order_by("-updated_at")
     lookup_field = "uuid"
 
-    @user_has_active_subscription
+    @user_has_active_subscription_or_is_admin
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().list(request, *args, **kwargs)
 
-    @user_has_active_subscription
+    @user_has_active_subscription_or_is_admin
     def retrieve(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return super().retrieve(request, *args, **kwargs)
 

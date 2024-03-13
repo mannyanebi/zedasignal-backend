@@ -7,6 +7,7 @@ from zedasignal_backend.apps.trading.models import Signal, Subscription
 from zedasignal_backend.apps.users.utils import get_custom_user_model
 from zedasignal_backend.core.mass_email_sender import MassEmailSender
 from zedasignal_backend.core.sender import Sender
+from zedasignal_backend.core.termii.bulk_termii_sender import TermiiBulkSmsSender
 
 User = get_custom_user_model()
 env = environ.Env()
@@ -95,7 +96,18 @@ class SignalService:
             signal (Signal): The signal to be sent.
             users (List[User] | QuerySet[User]): The list of users to send the signal to.
         """
-        pass
+        users_phone_numbers = [user.phone_number for user in users if user.phone_number]
+        termii_sender = TermiiBulkSmsSender()
+        message = f"""Signal Alert:
+        {signal.author.nickname} is {signal.action}ing
+        Pair: {signal.pair_base.upper()}/{signal.pair_quote.upper()}
+        Action: {signal.action.upper()}
+        Entry: {signal.entry}
+        TP: {signal.take_profit}
+        SL: {signal.stop_loss}
+        Powered by Zedapex
+        """
+        termii_sender.bulk_client.post(to=users_phone_numbers, message=message)
 
     @staticmethod
     def publish_signal_to_active_subscribers_by_email(signal: Signal):
@@ -120,4 +132,4 @@ class SignalService:
         """
         users = SignalService.fetch_active_subscriptions_users_by_channel("sms")
 
-        # for user in users:
+        SignalService.send_signal_to_subscribers_by_sms(signal, users)
