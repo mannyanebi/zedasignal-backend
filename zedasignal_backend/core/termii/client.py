@@ -13,7 +13,7 @@ class TermiiClient:
     def __init__(self) -> None:
         self.api_key = settings.TERMII_API_KEY
         self.from_sender = settings.TERMII_SENDER_ID
-        self.channel = "generic"
+        self.channel = "dnd"
         self.type = "plain"
         self.sms_url = f"{settings.TERMII_BASE_URL}/api/sms/send"
         self.headers = {"Content-Type": "application/json"}
